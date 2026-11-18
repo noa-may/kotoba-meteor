@@ -1,0 +1,338 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ことば Meteor — Vocabulary Practice</title><style>
+:root{font-family:system-ui,-apple-system,sans-serif;color:#eef5ff;background:#091326}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 0%,#23365c,#091326 65%)}main{max-width:950px;margin:auto;padding:22px 16px}header,.stats,.controls{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}h1{font-size:25px;margin:0}.muted{color:#aebbd3;font-size:13px}.panel{background:#15243e;border:1px solid #3b5275;border-radius:15px;padding:14px;margin:12px 0}.stats strong{color:#ffcf79}.button.danger{background:#a84562;color:white}.button.danger:hover{background:#c35371}.prompt{text-align:center;font-size:28px;font-weight:750;padding:5px}.prompt small{display:block;color:#b5c6df;font-size:13px;font-weight:400;margin-bottom:6px}.board{position:relative;overflow:hidden;height:430px;border:1px solid #486088;border-radius:18px;background:radial-gradient(ellipse at center,#1b2d50,#0b1428 75%);touch-action:manipulation}.board:before{content:"";position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(#ffffff88 1px,transparent 1px);background-size:41px 47px;opacity:.35}.ground{position:absolute;bottom:14px;left:0;right:0;border-top:2px dashed #f77e9b}.meteor{position:absolute;transform:translate(-50%,-50%);border:2px solid #86d4e6;border-radius:50%;width:104px;height:76px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 35% 28%,#4675a2,#263f6c);box-shadow:0 0 22px #56d2ec55;color:white;font-size:23px;font-weight:700;cursor:pointer;user-select:none;transition:filter .1s}.meteor:hover{filter:brightness(1.35)}.meteor:before{content:"";position:absolute;width:25px;height:36px;top:-25px;left:8px;background:linear-gradient(transparent,#f8aa54aa);transform:rotate(-30deg);clip-path:polygon(50% 0,100% 100%,0 100%);z-index:-1}.meteor.wrong{border-color:#ff748f;background:#833d59}.speak{border:1px solid #55759b;background:#263d60;color:white;border-radius:9px;padding:7px 11px;cursor:pointer;margin-left:9px}.speak:hover{background:#385b86}.button{border:0;border-radius:10px;background:#62c9c1;color:#0a2632;padding:10px 17px;font-weight:750;cursor:pointer}.button.secondary{background:#344969;color:#eef5ff}.button:disabled{opacity:.45;cursor:default}.controls{margin-top:12px}.overlay{position:absolute;inset:0;z-index:4;background:#091326e8;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px}.overlay>div{max-width:370px}.overlay h2{font-size:30px;margin:8px 0}.overlay p{color:#cad6e9;line-height:1.5}.hidden{display:none}.words{width:100%;border-collapse:collapse}.words td,.words th{text-align:left;padding:9px;border-bottom:1px solid #334968}.words th{color:#aebbd3;font-size:12px}textarea{width:100%;min-height:90px;background:#0b172b;border:1px solid #526787;border-radius:9px;color:white;padding:10px;font-family:ui-monospace,monospace}details summary{cursor:pointer;font-weight:650}#feedback{min-height:20px;text-align:center;color:#b8e6df;font-size:14px;margin-top:8px}@media(max-width:520px){.board{height:400px}.meteor{width:88px;height:68px;font-size:19px}.prompt{font-size:24px}}details:has(#wordInput){display:none}
+/* Responsive vector meteors: the white answer capsule grows with the text. */
+.meteor{position:absolute;display:block;box-sizing:border-box;transform:translate(-50%,-50%);padding:0;border:0;border-radius:0;background:none;box-shadow:none;color:#18203a;cursor:pointer;user-select:none;overflow:visible;isolation:isolate;touch-action:manipulation;transition:filter .12s;}
+.meteor::before{content:none;display:none}
+.meteor:hover{filter:drop-shadow(0 0 8px #00f5e9aa) brightness(1.08)}
+.meteor:focus-visible{outline:3px solid #fff;outline-offset:3px;border-radius:20px}
+.meteor.wrong{filter:drop-shadow(0 0 10px #ff547b)}
+.meteor-art{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.meteor-label{position:absolute;left:12px;right:12px;bottom:10px;height:39px;display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden;font-family:system-ui,-apple-system,sans-serif;font-weight:800;line-height:1;color:#171b3d;text-shadow:none;pointer-events:none}
+.meteor-flame-a{transform-origin:center 76px;animation:meteor-flame-a .75s ease-in-out infinite alternate}
+.meteor-flame-b{transform-origin:center 77px;animation:meteor-flame-b .9s ease-in-out infinite alternate}
+.meteor-flame-c{transform-origin:center 74px;animation:meteor-flame-c .62s ease-in-out infinite alternate}
+@keyframes meteor-flame-a{from{transform:scaleY(.82)}to{transform:scaleY(1.12)}}
+@keyframes meteor-flame-b{from{transform:scaleY(1.1)}to{transform:scaleY(.77)}}
+@keyframes meteor-flame-c{from{transform:scaleY(.82)}to{transform:scaleY(1.18)}}
+@media(prefers-reduced-motion:reduce){.meteor-flame-a,.meteor-flame-b,.meteor-flame-c{animation:none}}
+</style></head><body><main><header><div><h1>☄️ ことば Meteor</h1><div class="muted">Standalone Japanese vocabulary game</div></div><div class="controls"><button class="button secondary" id="reset">Restart</button><button class="button danger" id="end" disabled>End game</button></div></header><section class="panel stats"><div>Round <strong id="roundDisplay">1 / 3</strong></div><div>Question <strong id="questionDisplay">0 / 10</strong></div><div>Score <strong id="score">0</strong></div><div>Lives <strong id="lives">♥ ♥ ♥</strong></div><div>Streak <strong id="streak">0</strong></div><div>Mastered <strong id="mastered">0</strong></div><div class="muted" id="rotationDisplay">Cycle 0 · 0 unique words seen</div></section><section class="panel"><div class="prompt"><small id="instruction">Tap the Japanese word that means</small><span id="prompt">Possibility</span><button class="speak" id="speakPrompt" title="Hear Japanese pronunciation" aria-label="Read question aloud">🔊</button></div></section><div class="board" id="board"><div class="ground"></div><div class="overlay" id="overlay"><div><h2>Ready to practice?</h2><p>Tap the correct falling Japanese word before it reaches the ground. For kanji-reading questions, tapping a meteor reads the question kanji aloud. In other modes, tapping a meteor reads the selected word aloud. Incorrect taps or missed answers cost a life. Each session has 3 rounds of 10 questions. You can end the session at any time!</p><button class="button" id="start">Start game</button></div></div></div><div id="feedback" aria-live="polite"></div><div class="controls"><div class="muted">Every eligible word appears once per cycle before repeating.</div><div><label for="mode">Questions </label><select id="mode" style="padding:7px;background:#263b5b;color:white;border-radius:7px"><option value="meaning">English → Japanese</option><option value="kanji">Kanji → Hiragana</option><option value="reading">Hiragana → Kanji</option><option value="mixed" selected>Mixed practice</option></select></div><div><label for="speed">Speed </label><select id="speed" style="padding:7px;background:#263b5b;color:white;border-radius:7px"><option value="0.7">Relaxed</option><option value="1" selected>Normal</option><option value="1.4">Fast</option></select></div></div><p class="muted">Dictionary data: JMdict © Electronic Dictionary Research and Development Group, CC BY-SA 4.0. <a href="https://www.edrdg.org/edrdg/licence.html" style="color:#86d4e6" target="_blank" rel="noopener">Sources and license</a>.</p><section class="panel"><details><summary>Word bank & integration (editable)</summary><p class="muted">Edit a JSON array of objects with <code>jp</code>, <code>en</code>, and <code>reading</code> (hiragana, required for reading questions). Changes are stored locally in this browser; export your bank to keep a portable copy.</p><textarea id="wordInput"></textarea><div class="controls"><button class="button" id="apply">Load word bank</button><button class="button secondary" id="defaults">Restore starter words</button><button class="button secondary" id="exportBank">Export word bank</button></div><p class="muted" id="bankStatus"></p><table class="words"><thead><tr><th>Japanese</th><th>Reading</th><th>English</th><th>Asked</th></tr></thead><tbody id="wordRows"></tbody></table></details></section></main><script>
+const defaults=[];
+const $=id=>document.getElementById(id);let bank,active=[],running=false,last=0,score=0,lives=3,streak=0,mastered=new Set(),wrongCounts={},questionQueue=[],recentTargets=[],questionCounts={},questionCycle=0,questionBatch=new Map(),batchRequest="",round=0,question=0,completed=0,sessionToken=0,request=0,spawnClock=0,target=null,locked=false,questionMode="meaning";bank=[];
+function renderBank(){ $('wordInput').value=JSON.stringify(bank,null,2);$('wordRows').innerHTML='';bank.forEach(w=>{let tr=document.createElement('tr');[w.jp,w.reading||'',w.en,String(questionCounts[w.jp]||0)].forEach(s=>{let td=document.createElement('td');td.textContent=s;tr.append(td)});$('wordRows').append(tr)});if(!questionBatch.size)$('bankStatus').textContent=`${bank.length} words loaded`}
+function shuffle(a){const out=[...a];for(let i=out.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[out[i],out[j]]=[out[j],out[i]];}return out;}
+function stats(){ $('score').textContent=score;$('lives').textContent='♥ '.repeat(lives)+'♡ '.repeat(3-lives);$('streak').textContent=streak;$('mastered').textContent=mastered.size;$('roundDisplay').textContent=`${Math.max(1,round)} / 3`;$('questionDisplay').textContent=`${question} / 10`;const rotation=$('rotationDisplay');if(rotation)rotation.textContent=`Cycle ${questionCycle} · ${Object.keys(questionCounts).length}/${questionBatch.size||bank.length} words seen`}
+// Standalone pronunciation: no NHK Reader API or credentials required.
+function speakJapanese(word){
+ const text=String(word?.reading||word?.jp||'').trim();
+ if(!text || !('speechSynthesis' in window))return;
+ speechSynthesis.cancel();
+ const utterance=new SpeechSynthesisUtterance(text);
+ utterance.lang='ja-JP';utterance.rate=0.95;
+ const voices=speechSynthesis.getVoices();
+ utterance.voice=voices.find(v=>v.name==='Google 日本語')||
+   voices.find(v=>v.name==='Kyoko')||
+   voices.find(v=>v.lang.toLowerCase().startsWith('ja'))||null;
+ speechSynthesis.speak(utterance);
+}
+// Full JMdict lexicon loads separately; starter words remain available offline.
+const METEOR_DICTIONARY = [];
+const METEOR_LEXICON = [
+ ['fruit','いちご|strawberry|いちご','苺|strawberry|いちご','りんご|apple|りんご','林檎|apple|りんご','ぶどう|grape|ぶどう','葡萄|grape|ぶどう','もも|peach|もも','桃|peach|もも','みかん|mandarin orange|みかん','バナナ|banana|ばなな','さくらんぼ|cherry|さくらんぼ','梨|pear|なし','柿|persimmon|かき','西瓜|watermelon|すいか'],
+ ['plants','木|tree|き','林|woods|はやし','森|forest|もり','花|flower|はな','草|grass|くさ','葉|leaf|は','枝|branch|えだ','根|root|ね','桜|cherry blossom|さくら','竹|bamboo|たけ'],
+ ['places','公園|park|こうえん','庭|garden|にわ','学校|school|がっこう','図書館|library|としょかん','病院|hospital|びょういん','駅|station|えき','店|shop|みせ','銀行|bank|ぎんこう','家|house|いえ','会社|company|かいしゃ','教室|classroom|きょうしつ'],
+ ['transport','電車|train|でんしゃ','車|car|くるま','自転車|bicycle|じてんしゃ','バス|bus|ばす','飛行機|airplane|ひこうき','船|boat|ふね','地下鉄|subway|ちかてつ','新幹線|bullet train|しんかんせん'],
+ ['weather','雨|rain|あめ','雪|snow|ゆき','風|wind|かぜ','雲|cloud|くも','晴れ|sunny weather|はれ','雷|thunder|かみなり','台風|typhoon|たいふう','霧|fog|きり'],
+ ['time','朝|morning|あさ','昼|noon|ひる','夜|night|よる','夕方|evening|ゆうがた','今日|today|きょう','明日|tomorrow|あした','昨日|yesterday|きのう','来週|next week|らいしゅう','先週|last week|せんしゅう'],
+ ['feelings','嬉しい|happy|うれしい','悲しい|sad|かなしい','楽しい|fun|たのしい','怖い|scary|こわい','寂しい|lonely|さびしい','怒る|to get angry|おこる','驚く|to be surprised|おどろく'],
+ ['actions','走る|to run|はしる','歩く|to walk|あるく','泳ぐ|to swim|およぐ','飛ぶ|to fly|とぶ','登る|to climb|のぼる','降りる|to descend|おりる','止まる|to stop|とまる','動く|to move|うごく'],
+ ['food','ご飯|rice|ごはん','パン|bread|ぱん','肉|meat|にく','魚|fish|さかな','野菜|vegetables|やさい','卵|egg|たまご','牛乳|milk|ぎゅうにゅう','豆腐|tofu|とうふ','チーズ|cheese|ちーず'],
+ ['nature','山|mountain|やま','川|river|かわ','海|sea|うみ','湖|lake|みずうみ','島|island|しま','谷|valley|たに','空|sky|そら','砂漠|desert|さばく'],
+ ['education','小学校|elementary school|しょうがっこう','中学校|middle school|ちゅうがっこう','高校|high school|こうこう','高等学校|senior high school|こうとうがっこう','大学|university|だいがく','専門学校|vocational school|せんもんがっこう','幼稚園|kindergarten|ようちえん','教科書|textbook|きょうかしょ','授業|class|じゅぎょう','試験|exam|しけん'],
+ ['mu-verbs','住む|to live|すむ','進む|to advance|すすむ','積む|to pile up|つむ','包む|to wrap|つつむ','飲む|to drink|のむ','読む|to read|よむ','休む|to rest|やすむ','頼む|to request|たのむ','悩む|to worry|なやむ','沈む|to sink|しずむ','噛む|to bite|かむ','編む|to knit|あむ'],
+ ['su-verbs','話す|to speak|はなす','探す|to search|さがす','渡す|to hand over|わたす','返す|to return|かえす','消す|to erase|けす','貸す|to lend|かす','押す|to push|おす','指す|to point|さす','直す|to fix|なおす','動かす|to move something|うごかす'],
+ ['ru-verbs','食べる|to eat|たべる','見る|to see|みる','起きる|to wake up|おきる','寝る|to sleep|ねる','教える|to teach|おしえる','覚える|to remember|おぼえる','考える|to think|かんがえる','調べる|to investigate|しらべる','集める|to collect|あつめる','始める|to begin|はじめる'],
+ ['general-verbs','する|to do|する','行う|to perform|おこなう','実行する|to execute|じっこうする','実施する|to carry out|じっしする','作る|to make|つくる','使う|to use|つかう','行く|to go|いく','働く|to work|はたらく'],
+ ['people','先生|teacher|せんせい','学生|student|がくせい','医者|doctor|いしゃ','看護師|nurse|かんごし','警察官|police officer|けいさつかん','運転手|driver|うんてんしゅ','研究者|researcher|けんきゅうしゃ']
+];
+
+const METEOR_GROUPS = METEOR_LEXICON.map(g=>g.slice(1).map(s=>{
+ const [jp,en,reading]=s.split('|');const label=g[0];const verbGroup=label.endsWith('-verbs')||label==='actions';const pos=verbGroup||/^to\s/.test(en)?'verb':label==='feelings'&&jp.endsWith('い')?'adjective':'noun';return {jp,en,reading,pos,verbClass:verbGroup?(label==='general-verbs'?'mixed':label==='ru-verbs'?'ichidan':'godan'):undefined,ending:pos==='verb'?reading.slice(-1):undefined,topics:[label]};
+}));
+const METEOR_LOOKALIKES = ['未末','土士','日目','人入','大太犬','木本','待侍持','晴清精','買貝','間問聞','右石','千干','白自百','鳥烏','力刀','口日','午牛','考老','休体','村材','海毎','線緑','話語','晴睛','姉妹','春奏','顔頭','計討','持待','細組','週過','週周'];
+const METEOR_VISUAL = new Map();
+for(const group of METEOR_LOOKALIKES){for(const ch of group){const set=METEOR_VISUAL.get(ch)||new Set();for(const other of group)if(other!==ch)set.add(other);METEOR_VISUAL.set(ch,set);}}
+const METEOR_STARTER_BY_WORD=new Map(METEOR_GROUPS.flat().map(w=>[w.jp,w]));
+const METEOR_ALL_WORDS = [...new Map([...METEOR_STARTER_BY_WORD.values(),...METEOR_DICTIONARY].map(w=>{
+ const prior=METEOR_STARTER_BY_WORD.get(w.jp);
+ return [w.jp,prior?{...w,topics:[...new Set([...(w.topics||[]),...(prior.topics||[])])]}:w];
+})).values()];
+const METEOR_BY_WORD=new Map();
+const METEOR_BY_POS=new Map();
+const METEOR_BY_ENDING=new Map();
+const METEOR_BY_TOPIC=new Map();
+function meteorAddIndex(index,key,w){if(!key)return;const list=index.get(key)||[];list.push(w);index.set(key,list);}
+for(const w of METEOR_ALL_WORDS){
+ METEOR_BY_WORD.set(w.jp,w);
+ meteorAddIndex(METEOR_BY_POS,w.pos,w);
+ meteorAddIndex(METEOR_BY_ENDING,w.ending,w);
+ for(const topic of w.topics||[])meteorAddIndex(METEOR_BY_TOPIC,topic,w);
+}
+
+function meteorHira(s){return String(s||'').replace(/[\u30a1-\u30f6]/g,c=>String.fromCharCode(c.charCodeAt(0)-96));}
+function meteorDistance(a,b){a=meteorHira(a);b=meteorHira(b);const dp=Array.from({length:b.length+1},(_,i)=>i);for(let i=1;i<=a.length;i++){let prev=dp[0];dp[0]=i;for(let j=1;j<=b.length;j++){const temp=dp[j];dp[j]=Math.min(dp[j]+1,dp[j-1]+1,prev+(a[i-1]===b[j-1]?0:1));prev=temp;}}return dp[b.length];}
+function meteorMeaning(s){return String(s||'').toLowerCase().replace(/^(to |an? |the )/,'').replace(/[^a-z ]/g,'').trim();}
+function meteorSameMeaning(a,b){const x=meteorMeaning(a),y=meteorMeaning(b);return !!x&&!!y&&(x===y||x.length>3&&y.length>3&&(x.includes(y)||y.includes(x)));}
+function meteorVisualScore(a,b){let score=0;for(const c of String(a.jp||'')){if(String(b.jp||'').includes(c))score+=2;for(const v of METEOR_VISUAL.get(c)||[])if(String(b.jp||'').includes(v))score+=5;}return score;}
+// Dictionary metadata is authoritative; English glosses are never a substitute for POS.
+function meteorMetadata(w){
+ const d=METEOR_BY_WORD.get(w.jp);
+ if(d)return d;
+ const reading=meteorHira(w.reading||'');
+ const inferredPos=/^to\s+[a-z]/i.test(String(w.en||''))?'verb':(/(?:い)$/.test(w.jp)&&/\b(?:adjective|adj)\b/i.test(String(w.pos||''))?'adjective':'noun');
+ // Preserve the original reader's metadata where available.
+ return {...w,pos:w.pos||inferredPos,ending:reading.slice(-1),topics:w.topics||[]};
+}
+function meteorKanjiWord(w){return /[\u3400-\u9fff]/.test(String(w.jp||''));}
+// Build a candidate batch ONCE when a session starts or its mode changes.
+// Strict matching is preferred; each subsequent tier relaxes similarity,
+// without dropping the word from the question rotation.
+function meteorCandidates(target,mode){
+ const t=meteorMetadata(target);
+ const reading=meteorHira(target.reading||t.reading||'');
+ const pos=t.pos||'noun';
+ const pool=METEOR_ALL_WORDS;
+ const ranked=[];
+ const seen=new Set([target.jp]);
+ for(const w of pool){
+  if(!w.jp||!w.reading||!w.en||seen.has(w.jp))continue;
+  seen.add(w.jp);
+  if(meteorSameMeaning(w.en,target.en))continue;
+  const r=meteorHira(w.reading);
+  if(mode==='kanji'&&(!reading||r===reading))continue;
+  if(mode==='reading'&&!meteorKanjiWord(w))continue;
+  const diff=Math.abs(r.length-reading.length);
+  const samePos=w.pos===pos;
+  const sameClass=!!t.verbClass&&w.verbClass===t.verbClass;
+  const sameEnding=!!reading&&r.slice(-1)===reading.slice(-1);
+  const sharedTopic=(t.topics||[]).some(topic=>(w.topics||[]).includes(topic));
+  const visual=meteorVisualScore(target,w);
+  const distance=reading?meteorDistance(reading,r):99;
+  // Tiers: semantic/grammar, grammar+sound, grammar, sound, last resort.
+  let tier;
+  if(mode==='meaning'){
+   tier=samePos&&sharedTopic?0:samePos&&sameClass?1:samePos?2:sameEnding?3:4;
+  }else if(mode==='kanji'){
+   tier=samePos&&sameEnding&&sameClass&&diff<=2?0:
+        samePos&&sameEnding&&diff<=2?1:sameEnding&&diff<=2?2:
+        samePos&&diff<=2?3:4;
+  }else{
+   tier=samePos&&visual>0&&diff<=2?0:samePos&&diff<=2?1:
+        visual>0&&diff<=2?2:samePos?3:4;
+  }
+  const score=(sharedTopic?70:0)+(sameClass?20:0)+(sameEnding?25:0)+visual*9+
+    Math.max(0,7-distance)*5-diff*9;
+  ranked.push({w,tier,score});
+ }
+ return ranked.sort((a,b)=>a.tier-b.tier||b.score-a.score||a.w.jp.localeCompare(b.w.jp,'ja'));
+}
+function meteorChooseDistractors(target,mode){
+ const ranked=meteorCandidates(target,mode);
+ const answer=w=>mode==='kanji'?meteorHira(w.reading):w.jp;
+ const used=new Set([answer(target)]),selected=[];
+ for(const {w} of ranked){
+  const key=answer(w);
+  if(!key||used.has(key))continue;
+  used.add(key);selected.push(w);
+  if(selected.length===3)break;
+ }
+ return selected.length===3?selected:null;
+}
+function meteorQuestionOptions(word,requested){
+ const modes=requested==='mixed'?['meaning','kanji','reading']:[requested];
+ const valid=[];
+ for(const mode of modes){
+  // A meaning question needs no reading; reading questions do.
+  if(mode!=='meaning'&&(!word.reading||!word.reading.trim()))continue;
+  if(mode==='reading'&&!meteorKanjiWord(word))continue;
+  const distractors=meteorChooseDistractors(word,mode);
+  if(distractors)valid.push({mode,distractors});
+ }
+ // Preserve every valid saved word, even when its requested reading mode
+ // cannot be constructed. Fall back to a meaning question for that word.
+ if(!valid.length&&requested!=='meaning'){
+  const distractors=meteorChooseDistractors(word,'meaning');
+  if(distractors)valid.push({mode:'meaning',distractors});
+ }
+ return valid;
+}
+function meteorPrepareBatch(requested){
+ questionBatch=new Map();batchRequest=requested;
+ for(const word of bank){
+  if(!word||!String(word.jp||'').trim()||!String(word.en||'').trim())continue;
+  const options=meteorQuestionOptions(word,requested);
+  if(options.length)questionBatch.set(word.jp,{word,options});
+ }
+ questionQueue=[];
+ questionCycle=0;
+ recentTargets=[];
+ const skipped=bank.filter(w=>!questionBatch.has(w.jp));
+ $('bankStatus').textContent=`${questionBatch.size}/${bank.length} words ready`+
+  (skipped.length?` · Unable to prepare: ${skipped.map(w=>w.jp).join('、')}`:'');
+ return questionBatch.size;
+}
+function meteorNextQuestion(requested){
+ if(batchRequest!==requested)meteorPrepareBatch(requested);
+ if(!questionBatch.size)return null;
+ if(!questionQueue.length){
+  questionCycle++;
+  questionQueue=shuffle([...questionBatch.keys()]);
+  if(questionQueue.length>1&&questionQueue[0]===recentTargets.at(-1))
+   questionQueue.push(questionQueue.shift());
+ }
+ const jp=questionQueue.shift();
+ const item=questionBatch.get(jp);
+ const option=item.options[Math.floor(Math.random()*item.options.length)];
+ questionCounts[jp]=(questionCounts[jp]||0)+1;
+ renderBank();
+ recentTargets.push(jp);
+ if(recentTargets.length>4)recentTargets.shift();
+ return {word:item.word,mode:option.mode,distractors:option.distractors,cycle:questionCycle};
+}
+// Measure the actual Japanese text; size the capsule and vector art around it.
+const meteorMeasureCanvas=document.createElement('canvas');
+const meteorMeasureContext=meteorMeasureCanvas.getContext('2d');
+function meteorCreateElement(label,slot){
+ const maxWidth=Math.max(52,Math.floor(slot-8));
+ let fontSize=20;
+ const fontFamily='system-ui, -apple-system, sans-serif';
+ let textWidth=0;
+ if(meteorMeasureContext){
+  while(fontSize>10){
+   meteorMeasureContext.font=`800 ${fontSize}px ${fontFamily}`;
+   textWidth=meteorMeasureContext.measureText(label).width;
+   if(textWidth+30<=maxWidth)break;
+   fontSize--;
+  }
+ }
+ const width=Math.max(52,Math.min(maxWidth,Math.ceil(textWidth+30)));
+ const height=136,mid=width/2,bodyY=107,rx=width/2-4;
+ const el=document.createElement('button');
+ el.type='button';el.className='meteor';el.style.width=width+'px';el.style.height=height+'px';
+ el.setAttribute('aria-label',label);
+ // The three animated flame groups change length, not the size of the meteor body.
+ const svgNS='http://www.w3.org/2000/svg';
+ const svg=document.createElementNS(svgNS,'svg');
+ svg.setAttribute('class','meteor-art');svg.setAttribute('viewBox',`0 0 ${width} ${height}`);svg.setAttribute('aria-hidden','true');
+ svg.innerHTML=`
+ <g class="meteor-flame-a"><path d="M ${mid-18} 89 Q ${mid-24} 54 ${mid-14} 30 Q ${mid-8} 19 ${mid-5} 39 L ${mid-2} 63 Q ${mid+3} 42 ${mid+8} 12 Q ${mid+13} 1 ${mid+17} 23 L ${mid+20} 88 Z" fill="#08f4ee"/></g>
+ <g class="meteor-flame-b"><path d="M ${mid-25} 92 Q ${mid-26} 64 ${mid-19} 50 Q ${mid-15} 42 ${mid-11} 59 L ${mid-6} 74 Q ${mid-1} 45 ${mid+3} 36 Q ${mid+7} 28 ${mid+10} 49 L ${mid+15} 72 Q ${mid+20} 44 ${mid+24} 51 Q ${mid+29} 68 ${mid+26} 93 Z" fill="#ec00cf"/></g>
+ <g class="meteor-flame-c"><path d="M ${mid-3} 78 Q ${mid-8} 52 ${mid-3} 40 Q ${mid+2} 34 ${mid+5} 48 L ${mid+10} 78 Z" fill="#75218d"/></g>
+ <rect x="2" y="78" width="${width-4}" height="55" rx="27.5" fill="#06f5e8"/>
+ <rect x="7" y="83" width="${width-14}" height="45" rx="22.5" fill="#ec00cc"/>
+ <rect x="12" y="88" width="${width-24}" height="35" rx="17.5" fill="#fff"/>
+ `;
+ el.append(svg);
+ const text=document.createElement('span');text.className='meteor-label';text.style.fontSize=fontSize+'px';text.textContent=label;el.append(text);
+ return el;
+}
+function clearMeteors(){active.forEach(m=>m.el.remove());active=[]}
+async function startRound(){
+ if(!running)return;
+ if(question>=10){showRoundComplete();return}
+ locked=true;question++;stats();
+ const requested=$('mode').value;
+ const next=meteorNextQuestion(requested);
+ if(!next){running=false;locked=true;showMissingBank();return;}
+ target=next.word;
+ questionMode=next.mode;
+ const candidatesForTarget=next.distractors;
+ stats();
+ const instruction={meaning:'Tap the Japanese word that means',kanji:'Choose the hiragana reading for',reading:'Choose the kanji for this reading'};
+ $('instruction').textContent=instruction[questionMode];
+ $('prompt').textContent=questionMode==='meaning'?target.en:questionMode==='kanji'?target.jp:target.reading;
+ $('speakPrompt').style.display=questionMode==='meaning'?'none':'inline-block';
+ clearMeteors();
+ const questionToken=sessionToken;
+ // Select plausible distractors synchronously; never wait for Cloudflare AI.
+ const others=candidatesForTarget;
+ const choices=shuffle([target,...others]);
+ locked=false;
+ let width=$('board').clientWidth,slot=width/choices.length;
+ choices.forEach((w,i)=>{
+  const label=String(questionMode==='kanji'?w.reading:w.jp);
+  const el=meteorCreateElement(label,slot);
+  $('board').append(el);
+  const m={word:w,el,x:slot*(i+.5),y:-el.offsetHeight/2-(i%2)*85,speed:(33+Math.min(completed,18)*2.2)*Number($('speed').value)};
+  el.addEventListener('click',()=>answer(m));active.push(m);
+ });
+ $('feedback').textContent='';
+}
+function answer(m){
+ if(!running||locked)return;
+ // In kanji-to-hiragana questions, always pronounce the prompt kanji, not the selected answer.
+ speakJapanese(questionMode==='kanji'?target:m.word);
+ if(m.word.jp===target.jp){
+  locked=true;score+=100+Math.min(streak,10)*20;streak++;mastered.add(target.jp);
+  if(wrongCounts[target.jp]>0)wrongCounts[target.jp]--;
+  stats();$('feedback').textContent=`✓ ${target.jp} (${target.reading||''}) — ${target.en}`;
+  completed++;clearMeteors();const token=sessionToken;setTimeout(()=>{if(running&&token===sessionToken)startRound()},850);
+ }else{
+  m.el.classList.add('wrong');setTimeout(()=>m.el.classList.remove('wrong'),300);
+  wrongCounts[target.jp]=(wrongCounts[target.jp]||0)+1;
+  loseLife(`✕ ${m.word.jp} (${m.word.reading||''}) — ${m.word.en}`);
+ }
+}
+function loseLife(msg){if(!running)return;lives--;streak=0;stats();$('feedback').textContent=msg;if(lives<=0){finish();return}if(msg.startsWith('Missed')){locked=true;completed++;clearMeteors();const token=sessionToken;setTimeout(()=>{if(running&&token===sessionToken)startRound()},650)}}
+function showRoundComplete(){
+ running=false;locked=true;cancelAnimationFrame(request);clearMeteors();$('end').disabled=true;
+ const isFinal=round>=3;
+ $('overlay').classList.remove('hidden');
+ $('overlay').innerHTML=`<div><h2>${isFinal?'Session complete! 🎉':`Round ${round} complete! ☄️`}</h2><p>${isFinal?'You finished all 30 questions.':'10 questions completed. Ready for the next round?'}<br>Score: <b>${score}</b><br>Words mastered: <b>${mastered.size}</b><br>Lives remaining: <b>${lives}</b></p><button class="button" id="next">${isFinal?'Play a new session':`Start round ${round+1}`}</button>${isFinal?'':' <button class="button secondary" id="stopHere">End session</button>'}</div>`;
+ $('next').onclick=()=>{if(isFinal){begin()}else{round++;question=0;running=true;locked=false;$('end').disabled=false;$('overlay').classList.add('hidden');stats();startRound();last=performance.now();request=requestAnimationFrame(tick)}};
+ if(!isFinal)$('stopHere').onclick=()=>finish('Session ended');
+}
+function finish(reason='Game over ☄️'){
+ sessionToken++;running=false;locked=true;cancelAnimationFrame(request);clearMeteors();$('end').disabled=true;
+ $('overlay').classList.remove('hidden');
+ $('overlay').innerHTML=`<div><h2>${reason}</h2><p>Completed: <b>${completed} / 30</b> questions<br>Round: <b>${round} / 3</b><br>Score: <b>${score}</b><br>Words mastered: <b>${mastered.size}</b> / ${bank.length}</p><button class="button" id="again">Play a new session</button></div>`;
+ $('again').onclick=begin;
+}
+function tick(t){if(!running)return;let dt=Math.min((t-last)/1000,.05);last=t;if(!locked){for(const m of active){m.y+=m.speed*dt;m.el.style.left=m.x+'px';m.el.style.top=m.y+'px';if(m.word.jp===target.jp&&m.y+m.el.offsetHeight/2>=$('board').clientHeight-14){wrongCounts[target.jp]=(wrongCounts[target.jp]||0)+1;loseLife(`Missed ${target.jp} — ${target.en}`);break}}}request=requestAnimationFrame(tick)}
+function begin(){if(bank.length<1){showMissingBank();return;}sessionToken++;cancelAnimationFrame(request);score=0;lives=3;streak=0;round=1;question=0;completed=0;mastered=new Set();wrongCounts={};questionCounts={};questionCycle=0;questionQueue=[];recentTargets=[];questionBatch=new Map();batchRequest="";$('overlay').classList.remove('hidden');$('overlay').innerHTML='<div><h2>Preparing questions…</h2><p>Finding distractors for your vocabulary.</p></div>';meteorPrepareBatch($('mode').value);running=true;locked=false;$('end').disabled=false;$('overlay').classList.add('hidden');stats();startRound();last=performance.now();request=requestAnimationFrame(tick)}
+$('speakPrompt').onclick=()=>{if(target)speakJapanese(target)};$('mode').onchange=()=>{if(running)begin()};$('start').onclick=begin;$('reset').onclick=begin;$('end').onclick=()=>{if(running)finish('Session ended')};$('apply').onclick=()=>{try{let b=JSON.parse($('wordInput').value);if(!Array.isArray(b)||b.length<4||b.some(w=>typeof w.jp!=='string'||!w.jp.trim()||typeof w.en!=='string'||!w.en.trim()))throw Error('Provide at least 4 words, each with jp and en strings.');if(b.some(w=>w.reading!==undefined&&(typeof w.reading!=='string'||!w.reading.trim())))throw Error('Reading must be a nonempty hiragana string when provided.');if(new Set(b.map(w=>w.jp)).size!==b.length)throw Error('Japanese words must be unique.');bank=b;questionBatch=new Map();batchRequest="";localStorage.setItem('meteorBank',JSON.stringify(bank));renderBank();if(running)begin()}catch(e){$('bankStatus').textContent='Error: '+e.message}};$('defaults').onclick=()=>{bank=starterBank();localStorage.setItem('meteorBank',JSON.stringify(bank));questionBatch=new Map();batchRequest="";renderBank();if(running)begin()};$('exportBank').onclick=()=>{const blob=new Blob([JSON.stringify(bank,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='kotoba-word-bank.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};renderBank();stats();
+
+
+function showMissingBank(){
+ running=false;locked=true;cancelAnimationFrame(request);clearMeteors();$('end').disabled=true;
+ $('overlay').classList.remove('hidden');
+ $('overlay').innerHTML='<div><h2>No playable vocabulary</h2><p>Open Word bank & integration and add Japanese words with English meanings, or restore starter words.</p></div>';
+ $('feedback').textContent='Load vocabulary to play';
+}
+function starterBank(){
+ const entries=METEOR_GROUPS.flat();
+ return [...new Map(entries.map(w=>[w.jp,w])).values()].slice(0,60);
+}
+async function initializeStandalone(){
+ try {
+  const response=await fetch('./meteor-lexicon.json');
+  if(!response.ok)throw new Error('Dictionary unavailable');
+  const words=await response.json();
+  if(!Array.isArray(words))throw new Error('Invalid dictionary');
+  METEOR_DICTIONARY.push(...words);
+  // Rebuild lookup indexes after loading the external dictionary.
+  METEOR_ALL_WORDS.splice(0,METEOR_ALL_WORDS.length,...new Map([...METEOR_STARTER_BY_WORD.values(),...METEOR_DICTIONARY].map(w=>{
+   const prior=METEOR_STARTER_BY_WORD.get(w.jp);
+   return [w.jp,prior?{...w,topics:[...new Set([...(w.topics||[]),...(prior.topics||[])])]}:w];
+  })).values());
+  METEOR_BY_WORD.clear();METEOR_BY_POS.clear();METEOR_BY_ENDING.clear();METEOR_BY_TOPIC.clear();
+  for(const w of METEOR_ALL_WORDS){METEOR_BY_WORD.set(w.jp,w);meteorAddIndex(METEOR_BY_POS,w.pos,w);meteorAddIndex(METEOR_BY_ENDING,w.ending,w);for(const topic of w.topics||[])meteorAddIndex(METEOR_BY_TOPIC,topic,w)}
+ } catch(e){console.warn('Using built-in starter dictionary:',e.message)}
+ try {const saved=JSON.parse(localStorage.getItem('meteorBank')||'null');bank=Array.isArray(saved)&&saved.length>=4?saved:starterBank()}
+ catch(e){bank=starterBank()}
+ renderBank();stats();
+ $('overlay').innerHTML='<div><h2>Ready to practice?</h2><p>'+bank.length+' words in your word bank. Three rounds of 10 questions. Change modes or speed below.</p><button class="button" id="start">Start game</button></div>';
+ $('start').onclick=begin;
+ $('bankStatus').textContent=bank.length+' words in your bank · '+METEOR_ALL_WORDS.length+' dictionary entries available for distractors';
+}
+initializeStandalone();
+</script></body></html>
